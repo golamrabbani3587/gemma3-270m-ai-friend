@@ -12,13 +12,20 @@ from threading import Thread
 
 def run_api_server():
     """Run the FastAPI server"""
-    print("🚀 Starting API server on port 8001...")
-    subprocess.run([sys.executable, "api_server.py"])
+    port = os.environ.get('API_PORT', '8001')
+    print(f"🚀 Starting API server on port {port}...")
+    env = os.environ.copy()
+    env['PORT'] = port
+    subprocess.run([sys.executable, "api_server.py"], env=env)
 
 def run_web_server():
     """Run the web server"""
-    print("🌐 Starting web server on port 3000...")
-    subprocess.run([sys.executable, "web_server.py"])
+    port = os.environ.get('PORT', '3000')
+    print(f"🌐 Starting web server on port {port}...")
+    env = os.environ.copy()
+    env['PORT'] = port
+    env['API_URL'] = f"http://localhost:{os.environ.get('API_PORT', '8001')}"
+    subprocess.run([sys.executable, "web_server.py"], env=env)
 
 def main():
     print("💖 Starting AI Chat Companion...")

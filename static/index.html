@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>AI Friend - Your Loving AI Companion</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -16,7 +16,12 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
+            height: 100vh;
             overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
         .container {
@@ -26,6 +31,8 @@
             height: 100vh;
             display: flex;
             flex-direction: column;
+            box-sizing: border-box;
+            overflow: hidden;
         }
 
         .header {
@@ -38,7 +45,7 @@
             font-size: 2.5rem;
             margin-bottom: 10px;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-            background: linear-gradient(45deg, #ff6b9d, #c44569, #ff6b9d);
+            background: linear-gradient(45deg, #667eea, #764ba2, #667eea);
             background-size: 200% 200%;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -65,10 +72,12 @@
             overflow: hidden;
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255,255,255,0.2);
+            min-height: 0;
+            position: relative;
         }
 
         .chat-header {
-            background: linear-gradient(135deg, #ff6b9d 0%, #c44569 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             padding: 20px;
             text-align: center;
@@ -111,13 +120,19 @@
             overflow-y: auto;
             background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
             scroll-behavior: smooth;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            position: relative;
         }
 
         .message {
-            margin-bottom: 20px;
             display: flex;
             align-items: flex-start;
             animation: slideIn 0.4s ease-out;
+            width: 100%;
+            margin-bottom: 10px;
         }
 
         @keyframes slideIn {
@@ -142,6 +157,7 @@
             position: relative;
             word-wrap: break-word;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            display: block;
         }
 
         .message.user .message-content {
@@ -153,7 +169,7 @@
         .message.bot .message-content {
             background: white;
             color: #333;
-            border: 2px solid #ff6b9d;
+            border: 2px solid #667eea;
             border-bottom-left-radius: 5px;
         }
 
@@ -176,7 +192,7 @@
             padding: 15px 20px;
             background: white;
             border-radius: 20px;
-            border: 2px solid #ff6b9d;
+            border: 2px solid #667eea;
             max-width: 70%;
             margin-bottom: 20px;
             animation: slideIn 0.3s ease-out;
@@ -190,7 +206,7 @@
         .typing-dot {
             width: 8px;
             height: 8px;
-            background: #ff6b9d;
+            background: #667eea;
             border-radius: 50%;
             animation: typing 1.4s infinite;
         }
@@ -210,6 +226,9 @@
             display: flex;
             gap: 10px;
             align-items: center;
+            position: sticky;
+            bottom: 0;
+            z-index: 10;
         }
 
         .chat-input {
@@ -237,13 +256,14 @@
             align-items: center;
             justify-content: center;
             font-size: 18px;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
 
         .send-btn {
-            background: linear-gradient(135deg, #ff6b9d 0%, #c44569 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
         }
 
@@ -253,12 +273,12 @@
         }
 
         .send-btn:hover, .voice-btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
         }
 
         .send-btn:active, .voice-btn:active {
-            transform: scale(0.95);
+            transform: scale(0.98);
         }
 
         .voice-btn.listening {
@@ -319,7 +339,20 @@
             color: white;
             font-weight: bold;
             z-index: 1000;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            animation: slideInRight 0.5s ease-out;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
         }
 
         .status-connected {
@@ -420,18 +453,29 @@
         @media (max-width: 768px) {
             .container {
                 padding: 10px;
+                height: 100vh;
+                overflow: hidden;
             }
             
             .header h1 {
-                font-size: 2rem;
+                font-size: 1.8rem;
+                margin-bottom: 5px;
+            }
+            
+            .header p {
+                font-size: 1rem;
             }
             
             .message-content {
                 max-width: 85%;
+                padding: 12px 16px;
+                font-size: 14px;
             }
 
             .chat-input-container {
                 padding: 15px;
+                position: sticky;
+                bottom: 0;
             }
 
             .send-btn, .voice-btn {
@@ -439,21 +483,80 @@
                 height: 45px;
                 font-size: 16px;
             }
+
+            .chat-header {
+                padding: 15px;
+            }
+
+            .chat-header h2 {
+                font-size: 1.3rem;
+            }
+
+            .chat-header p {
+                font-size: 0.9rem;
+            }
+
+            .chat-messages {
+                padding: 15px;
+                flex: 1;
+                overflow-y: auto;
+            }
         }
 
         @media (max-width: 480px) {
+            .container {
+                padding: 5px;
+                height: 100vh;
+                overflow: hidden;
+            }
+            
             .header h1 {
                 font-size: 1.5rem;
             }
             
+            .header p {
+                font-size: 0.9rem;
+            }
+            
             .message-content {
                 max-width: 90%;
-                padding: 12px 16px;
+                padding: 10px 14px;
+                font-size: 13px;
             }
 
             .chat-input {
-                padding: 12px 16px;
+                padding: 10px 14px;
                 font-size: 14px;
+            }
+
+            .chat-header {
+                padding: 12px;
+            }
+
+            .chat-header h2 {
+                font-size: 1.2rem;
+            }
+
+            .chat-header p {
+                font-size: 0.8rem;
+            }
+
+            .send-btn, .voice-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 14px;
+            }
+
+            .chat-messages {
+                padding: 10px;
+                flex: 1;
+                overflow-y: auto;
+            }
+
+            .chat-input-container {
+                padding: 12px;
+                position: sticky;
+                bottom: 0;
             }
         }
     </style>
@@ -511,18 +614,40 @@
     <script>
         class ChatApp {
             constructor() {
-                this.apiUrl = 'http://localhost:8001';
+                // Auto-detect API URL for production
+                const hostname = window.location.hostname;
+                const protocol = window.location.protocol;
+                const port = window.location.port;
+                
+                if (hostname === 'localhost' || hostname === '127.0.0.1') {
+                    // For local development, use the combined app on port 3000
+                    this.apiUrl = 'http://localhost:3000';
+                } else {
+                    // For production, use the same host and port (API and web server on same port)
+                    this.apiUrl = `${protocol}//${hostname}${port ? ':' + port : ''}`;
+                    console.log('Production API URL:', this.apiUrl);
+                }
+                
                 this.conversationHistory = [];
                 this.isListening = false;
                 this.recognition = null;
                 this.synthesis = window.speechSynthesis;
                 this.currentUtterance = null;
+                this.connectionRetries = 0;
+                this.maxRetries = 3;
                 
                 this.initializeElements();
                 this.initializeSpeechRecognition();
                 this.initializeEventListeners();
                 this.createFloatingHearts();
                 this.checkConnection();
+                
+                // Retry connection every 5 seconds if disconnected
+                setInterval(() => {
+                    if (this.statusIndicator.classList.contains('status-disconnected')) {
+                        this.checkConnection();
+                    }
+                }, 5000);
             }
 
             initializeElements() {
@@ -581,6 +706,12 @@
                 const message = this.chatInput.value.trim();
                 if (!message) return;
 
+                // Check connection status first
+                if (this.statusIndicator.classList.contains('status-disconnected')) {
+                    this.addMessage('I\'m having trouble connecting right now. Please check your connection and try again! 💕', 'bot');
+                    return;
+                }
+
                 // Add user message to chat
                 this.addMessage(message, 'user');
                 this.chatInput.value = '';
@@ -590,6 +721,7 @@
                 this.showTypingIndicator();
 
                 try {
+                    console.log('Sending message to:', `${this.apiUrl}/chat`);
                     const response = await fetch(`${this.apiUrl}/chat`, {
                         method: 'POST',
                         headers: {
@@ -598,7 +730,8 @@
                         body: JSON.stringify({
                             message: message,
                             conversation_history: this.conversationHistory
-                        })
+                        }),
+                        timeout: 30000 // 30 second timeout
                     });
 
                     if (!response.ok) {
@@ -622,7 +755,12 @@
                 } catch (error) {
                     console.error('Error sending message:', error);
                     this.hideTypingIndicator();
-                    this.addMessage('Sorry, I\'m having trouble connecting right now. Please try again! 💕', 'bot');
+                    
+                    // Update connection status
+                    this.statusIndicator.className = 'status-indicator status-disconnected';
+                    this.statusIndicator.innerHTML = '<i class="fas fa-circle"></i> Disconnected';
+                    
+                    this.addMessage('Sorry, I\'m having trouble connecting right now. Please try again in a moment! 💕', 'bot');
                 }
             }
 
@@ -637,8 +775,10 @@
                 messageDiv.appendChild(contentDiv);
                 this.chatMessages.appendChild(messageDiv);
                 
-                // Scroll to bottom
-                this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+                // Ensure proper scrolling with a small delay
+                setTimeout(() => {
+                    this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+                }, 100);
 
                 // Add to conversation history
                 if (sender === 'user') {
@@ -756,19 +896,35 @@
 
             async checkConnection() {
                 try {
-                    const response = await fetch(`${this.apiUrl}/health`);
-                    const data = await response.json();
+                    console.log('Checking connection to:', `${this.apiUrl}/health`);
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
                     
-                    if (data.status === 'healthy') {
-                        this.statusIndicator.className = 'status-indicator status-connected';
-                        this.statusIndicator.innerHTML = '<i class="fas fa-circle"></i> Connected';
+                    const response = await fetch(`${this.apiUrl}/health`, {
+                        signal: controller.signal
+                    });
+                    
+                    clearTimeout(timeoutId);
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        console.log('Health check response:', data);
+                        
+                        if (data.status === 'healthy') {
+                            this.statusIndicator.className = 'status-indicator status-connected';
+                            this.statusIndicator.innerHTML = '<i class="fas fa-circle"></i> Connected';
+                            this.connectionRetries = 0;
+                        } else {
+                            throw new Error('API not healthy');
+                        }
                     } else {
-                        this.statusIndicator.className = 'status-indicator status-disconnected';
-                        this.statusIndicator.innerHTML = '<i class="fas fa-circle"></i> Disconnected';
+                        throw new Error(`HTTP ${response.status}`);
                     }
                 } catch (error) {
+                    console.log('Connection check failed:', error.message);
                     this.statusIndicator.className = 'status-indicator status-disconnected';
                     this.statusIndicator.innerHTML = '<i class="fas fa-circle"></i> Disconnected';
+                    this.connectionRetries++;
                 }
             }
         }
