@@ -335,9 +335,9 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(0,0,0,0.8);
+            background: transparent;
             color: white;
-            padding: 20px 40px;
+            padding: 0;
             border-radius: 15px;
             display: none;
             z-index: 1001;
@@ -353,10 +353,68 @@
             display: block;
         }
 
-        .speech-indicator i {
-            font-size: 24px;
-            margin-right: 10px;
-            animation: pulse 1s infinite;
+        /* Wave animation for mic icon */
+        .voice-btn.wave {
+            animation: wave-animation 1.5s ease-in-out infinite;
+        }
+
+        .voice-btn.wave::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.3), transparent);
+            transform: translate(-50%, -50%);
+            animation: horizontal-wave 1.5s ease-in-out infinite;
+        }
+
+        @keyframes horizontal-wave {
+            0% { 
+                transform: translate(-50%, -50%) scaleX(0);
+                opacity: 0;
+            }
+            50% { 
+                transform: translate(-50%, -50%) scaleX(2);
+                opacity: 1;
+            }
+            100% { 
+                transform: translate(-50%, -50%) scaleX(4);
+                opacity: 0;
+            }
+        }
+
+        /* Wave animation for speaking state */
+        .voice-btn.speaking {
+            animation: speaking-wave 1.2s ease-in-out infinite;
+        }
+
+        .voice-btn.speaking::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 107, 157, 0.3), transparent);
+            transform: translate(-50%, -50%);
+            animation: horizontal-speaking-wave 1.2s ease-in-out infinite;
+        }
+
+        @keyframes horizontal-speaking-wave {
+            0% { 
+                transform: translate(-50%, -50%) scaleX(0);
+                opacity: 0;
+            }
+            50% { 
+                transform: translate(-50%, -50%) scaleX(2);
+                opacity: 1;
+            }
+            100% { 
+                transform: translate(-50%, -50%) scaleX(4);
+                opacity: 0;
+            }
         }
 
         @media (max-width: 768px) {
@@ -408,8 +466,6 @@
     </div>
 
     <div class="speech-indicator" id="speechIndicator">
-        <i class="fas fa-volume-up"></i>
-        <span>AI Friend is speaking...</span>
     </div>
 
     <div class="container">
@@ -618,7 +674,7 @@
                 if (this.recognition) {
                     this.recognition.start();
                     this.isListening = true;
-                    this.voiceBtn.classList.add('listening');
+                    this.voiceBtn.classList.add('listening', 'wave');
                     this.voiceBtn.innerHTML = '<i class="fas fa-stop"></i>';
                 }
             }
@@ -627,7 +683,7 @@
                 if (this.recognition) {
                     this.recognition.stop();
                     this.isListening = false;
-                    this.voiceBtn.classList.remove('listening');
+                    this.voiceBtn.classList.remove('listening', 'wave');
                     this.voiceBtn.innerHTML = '<i class="fas fa-microphone"></i>';
                 }
             }
@@ -644,8 +700,9 @@
                     // Stop any current speech
                     this.synthesis.cancel();
 
-                    // Show speech indicator
+                    // Show speech indicator and add speaking wave animation
                     this.speechIndicator.classList.add('show');
+                    this.voiceBtn.classList.add('speaking');
 
                     const utterance = new SpeechSynthesisUtterance(text);
                     utterance.rate = 0.9;
@@ -665,10 +722,12 @@
 
                     utterance.onend = () => {
                         this.speechIndicator.classList.remove('show');
+                        this.voiceBtn.classList.remove('speaking');
                     };
 
                     utterance.onerror = () => {
                         this.speechIndicator.classList.remove('show');
+                        this.voiceBtn.classList.remove('speaking');
                     };
 
                     this.synthesis.speak(utterance);
