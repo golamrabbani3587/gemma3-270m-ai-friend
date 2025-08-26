@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>AI Friend - Your Loving AI Companion</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -622,6 +625,7 @@
                 if (hostname === 'localhost' || hostname === '127.0.0.1') {
                     // For local development, use the combined app on port 3000
                     this.apiUrl = 'http://localhost:3000';
+                    console.log('Local development API URL:', this.apiUrl);
                 } else {
                     // For production, use the same host and port (API and web server on same port)
                     this.apiUrl = `${protocol}//${hostname}${port ? ':' + port : ''}`;
