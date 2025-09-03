@@ -56,8 +56,15 @@ def load_model():
     base_model_id = "google/gemma-3-270m-it"
     adapter_path = "./trained_model"
     
+    # Get Hugging Face token from environment
+    hf_token = os.environ.get('HUGGING_FACE_HUB_TOKEN')
+    
     # Load tokenizer
-    tokenizer = AutoTokenizer.from_pretrained(base_model_id)
+    tokenizer = AutoTokenizer.from_pretrained(
+        base_model_id,
+        token=hf_token,
+        trust_remote_code=True
+    )
     tokenizer.pad_token = tokenizer.eos_token
     
     # Load base model
@@ -65,7 +72,8 @@ def load_model():
         base_model_id,
         device_map="auto",
         torch_dtype=torch.float32,
-        token=True
+        token=hf_token,
+        trust_remote_code=True
     )
     
     # Load the fine-tuned adapter
