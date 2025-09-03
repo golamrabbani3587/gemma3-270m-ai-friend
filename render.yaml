@@ -1,12 +1,15 @@
+
 services:
   - type: web
     name: ai-friend-companion
     env: python
     buildCommand: chmod +x build.sh && ./build.sh
-    startCommand: python render_app.py
+    startCommand: python3 render_app.py
     envVars:
       - key: PYTHON_VERSION
         value: 3.11
       - key: HUGGING_FACE_HUB_TOKEN
         sync: false
+      - key: PORT
+        value: 8000
     plan: free
