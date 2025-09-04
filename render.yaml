@@ -3,8 +3,8 @@ services:
   - type: web
     name: ai-friend-companion
     env: python
-    buildCommand: chmod +x build.sh && ./build.sh
-    startCommand: ./start.sh
+    buildCommand: chmod +x build.sh && chmod +x render_app.py && ./build.sh
+    startCommand: python render_app.py
     envVars:
       - key: PYTHON_VERSION
         value: 3.11
