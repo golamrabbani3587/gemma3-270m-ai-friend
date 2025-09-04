@@ -16,12 +16,27 @@ import json
 from typing import Optional
 import uvicorn
 import os
+from contextlib import asynccontextmanager
 
-# Initialize FastAPI app
+# Global model variables
+model = None
+tokenizer = None
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Lifespan context manager for model loading"""
+    # Startup
+    load_model()
+    yield
+    # Shutdown
+    pass
+
+# Initialize FastAPI app with lifespan
 app = FastAPI(
     title="AI Chat Companion",
     description="Combined API and web server for conversational AI with emotional support",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan
 )
 
 # Add CORS middleware
@@ -42,19 +57,37 @@ class ChatResponse(BaseModel):
     response: str
     status: str = "success"
 
-# Global model variables
-model = None
-tokenizer = None
-
 def load_model():
     """Load the fine-tuned model"""
     global model, tokenizer
     
     print("Loading AI model...")
     
-    # Load the fine-tuned model
+    # Try to use the fine-tuned model, fallback to base model if needed
     base_model_id = "google/gemma-3-270m-it"
     adapter_path = "./trained_model"
+    
+    # Check if we're on Render free tier (limited memory)
+    is_render_free = os.environ.get('RENDER', 'false').lower() == 'true'
+    if is_render_free:
+        print("Detected Render environment - using memory optimizations")
+        # For free tier, we might need to skip the adapter and use base model only
+        try:
+            # Try to load with adapter first
+            load_model_with_adapter(base_model_id, adapter_path)
+        except Exception as e:
+            print(f"Failed to load with adapter: {e}")
+            print("Falling back to base model only...")
+            load_base_model_only(base_model_id)
+    else:
+        # Local development - use full model
+        load_model_with_adapter(base_model_id, adapter_path)
+    
+
+
+def load_model_with_adapter(base_model_id, adapter_path):
+    """Load model with fine-tuned adapter"""
+    global model, tokenizer
     
     # Get Hugging Face token from environment
     hf_token = os.environ.get('HUGGING_FACE_HUB_TOKEN')
@@ -67,25 +100,51 @@ def load_model():
     )
     tokenizer.pad_token = tokenizer.eos_token
     
-    # Load base model
+    # Load base model with memory optimizations for free tier
     model = AutoModelForCausalLM.from_pretrained(
         base_model_id,
         device_map="auto",
-        torch_dtype=torch.float32,
+        torch_dtype=torch.float16,  # Use float16 to save memory
         token=hf_token,
-        trust_remote_code=True
+        trust_remote_code=True,
+        low_cpu_mem_usage=True,  # Reduce CPU memory usage
+        max_memory={0: "400MB"}  # Limit memory to 400MB for free tier
     )
     
     # Load the fine-tuned adapter
     model = PeftModel.from_pretrained(model, adapter_path)
     model.eval()
     
-    print("Model loaded successfully!")
+    print("Model with adapter loaded successfully!")
 
-@app.on_event("startup")
-async def startup_event():
-    """Load model on startup"""
-    load_model()
+def load_base_model_only(base_model_id):
+    """Load base model without adapter for memory-constrained environments"""
+    global model, tokenizer
+    
+    # Get Hugging Face token from environment
+    hf_token = os.environ.get('HUGGING_FACE_HUB_TOKEN')
+    
+    # Load tokenizer
+    tokenizer = AutoTokenizer.from_pretrained(
+        base_model_id,
+        token=hf_token,
+        trust_remote_code=True
+    )
+    tokenizer.pad_token = tokenizer.eos_token
+    
+    # Load base model with maximum memory optimizations
+    model = AutoModelForCausalLM.from_pretrained(
+        base_model_id,
+        device_map="auto",
+        torch_dtype=torch.float16,  # Use float16 to save memory
+        token=hf_token,
+        trust_remote_code=True,
+        low_cpu_mem_usage=True,  # Reduce CPU memory usage
+        max_memory={0: "300MB"}  # Very strict memory limit
+    )
+    
+    model.eval()
+    print("Base model loaded successfully (without fine-tuning)!")
 
 # Mount static files
 app.mount("/static", StaticFiles(directory="static"), name="static")
